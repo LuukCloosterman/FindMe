@@ -1,4 +1,4 @@
-use master;
+
 START TRANSACTION;
 
 CREATE DATABASE  findMe;
