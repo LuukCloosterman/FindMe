@@ -23,13 +23,15 @@ CREATE TABLE gemLoc(
     PRIMARY KEY(longitude, latitude)
 );
 
+
+
 ALTER TABLE uLoc
 ADD CONSTRAINT FK_uLoc_ref_user
-FOREIGN KEY (uid) REFERENCES uLoc(uid);
+FOREIGN KEY (uid) REFERENCES user(uid);
 
 ALTER TABLE gemLoc
 ADD CONSTRAINT FK_gemLoc_ref_user
-FOREIGN KEY (uid) REFERENCES gemLoc(uid);
+FOREIGN KEY (uid) REFERENCES user(uid);
     
 
 commit;
