@@ -1,25 +1,26 @@
+
 START TRANSACTION;
+
 CREATE DATABASE  findMe;
 
 USE findMe;
 
 CREATE TABLE user(
 	uid INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
     PRIMARY KEY (uid)
 );
 
 CREATE TABLE uLoc(
 	uid INT NOT NULL,
-	longitude DECIMAL(9.6) NOT NULL,
-	latitude DECIMAL(9.6) NOT NULL,
+	longitude DECIMAL(9,6) NOT NULL,
+	latitude DECIMAL(9,6) NOT NULL,
 	PRIMARY KEY(uid)
 );
 
 CREATE TABLE gemLoc(
 	uid	INT NOT NULL,
-    longitude DECIMAL(9.6) NOT NULL,
-    latitude DECIMAL(9.6) NOT NULL,
+    longitude DECIMAL(9,6) NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
     PRIMARY KEY(longitude, latitude)
 );
 
