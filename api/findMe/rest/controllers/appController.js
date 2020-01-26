@@ -25,10 +25,10 @@ module.exports = (app) => {
     });
 
     app.post('/', (req, res, next )=> {
-        let postQuery = 'INSERT INTO uloc (uid, long, lat) VALUES(?, ?, ?)'
+        let postQuery = 'INSERT INTO uloc (uid, longitude, latitude) VALUES(?, ?, ?)'
         let params = [
             req.body.id,
-            req.body.long,
+            req.body.longi,
             req.body.lat
         ];
         app.db.query(postQuery, params, function (err, result) {
@@ -36,4 +36,5 @@ module.exports = (app) => {
             res.status(201).json("Added succesfully")
         } )
     });
+
 };
