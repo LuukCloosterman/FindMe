@@ -53,20 +53,22 @@ DELIMITER ;
 
 
 
-DROP PROCEDURE IF EXISTS `calcDist`;
+DROP function IF EXISTS `calcDist`;
 DELIMITER ;;
-CREATE PROCEDURE `calcDist`(lat1 decimal(9,6), lon1 decimal(9,6), lat2 decimal(9,6), lon2 decimal(9,6),out dist decimal(9,6))
+CREATE function `calcDist`(lat1 decimal(9,6), lon1 decimal(9,6), lat2 decimal(9,6), lon2 decimal(9,6))
+Returns decimal(9,6)
 BEGIN 
-	
+
 
 set @a = 0.5 - cos((lat2 - lat1) * (pi() / 180))/2 + 
           cos(lat1 * (pi() / 180)) * cos(lat2 * (pi() / 180)) * 
           (1 - cos((lon2 - lon1) * (pi() / 180)))/2;
 
-set dist = 12742 * asin(sqrt(@a));
+return 12742 * asin(sqrt(@a));
 
 END ;;
 DELIMITER ;
+
 
 
 DROP PROCEDURE IF EXISTS `setMeeting`;
@@ -84,5 +86,66 @@ values (uid1,ROUND(@lat,9),ROUND(@lon,9)),
 
 
 
+END ;;
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS `makeGemLoc`;
+DELIMITER ;;
+CREATE PROCEDURE `makeGemLoc`(uidIN int, lat decimal(9,6), lon decimal(9,6))
+proc: BEGIN 
+if exists(select  latitude,longitude
+		from gemLoc 
+		where calcDist(lat,lon,latitude,longitude)<15)	
+	THEN
+		select  latitude,longitude
+		into @latitude, @longitude
+		from gemLoc 
+		where calcDist(lat,lon,latitude,longitude)<15
+		order by calcDist(lat,lon,latitude,longitude) desc
+		LIMIT 1 ;
+
+		insert into gemloc(uid,latitude,longitude)
+		values(uidIN,@latitude,@longitude);
+        
+        
+        call getGemLoc(uidIn);
+        
+        
+        leave proc;
+	end IF;
+
+
+if exists(select  latitude,longitude
+		from Uloc 
+		where calcDist(lat,lon,latitude,longitude)<15)
+	THEN
+		select  uid ,latitude,longitude
+		into @uid, @latitude, @longitude
+		from Uloc 
+		where calcDist(lat,lon,latitude,longitude)<15
+        and uid != uidIN
+		order by calcDist(lat,lon,latitude,longitude) desc
+		LIMIT 1 ;
+        
+        call `setMeeting`(uidIN, lat, lon, @uid, @latitude, @longitude);
+        
+        
+        
+        leave proc;
+	end IF;
+
+END ;;
+DELIMITER ;
+
+
+
+drop PROCEDURE if exists `getGemLoc`;
+
+DELIMITER ;;
+create procedure `getGemLoc`(userID int)
+BEGIN 
+    select * 
+    from gemloc
+    where userID = uid;
 END ;;
 DELIMITER ;
