@@ -121,7 +121,8 @@ if exists(select  latitude,longitude
 	THEN
 		select  uid ,latitude,longitude
 		into @uid, @latitude, @longitude
-		from Uloc 
+		from Uloc left join gemloc
+        	on uid = uid
 		where calcDist(lat,lon,latitude,longitude)<15
         and uid != uidIN
 		order by calcDist(lat,lon,latitude,longitude) desc
@@ -138,7 +139,6 @@ END ;;
 DELIMITER ;
 
 
-
 drop PROCEDURE if exists `getGemLoc`;
 
 DELIMITER ;;
@@ -149,3 +149,25 @@ BEGIN
     where userID = uid;
 END ;;
 DELIMITER ;
+
+
+drop PROCEDURE if exists `logout`;
+
+DELIMITER ;;
+create procedure `logout`(userID int)
+
+BEGIN 
+    delete
+    from gemloc
+    where uid = userID;
+    
+    delete
+    from Uloc
+    where uid = userID;
+    
+    delete
+    from findme.user
+    where uid = userID;
+END ;;
+DELIMITER ;
+
