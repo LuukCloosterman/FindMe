@@ -16,10 +16,13 @@ import androidx.core.app.ActivityCompat;
 
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,8 +36,11 @@ import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.android.volley.Request.Method.GET;
+import static com.android.volley.Request.Method.POST;
 
 public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
@@ -53,6 +59,9 @@ public class MainActivity extends AppCompatActivity
     // integer for permissions results request
     private static final int ALL_PERMISSIONS_RESULT = 1011;
     private int userNumber;
+    private double longi;
+    private double lati;
+    private RequestQueue queue;
 
 
     @Override
@@ -78,7 +87,8 @@ public class MainActivity extends AppCompatActivity
                 addApi(LocationServices.API).
                 addConnectionCallbacks(this).
                 addOnConnectionFailedListener(this).build();
-
+        googleApiClient.connect();
+        queue = Volley.newRequestQueue(this);
         getUserName();
     }
 
@@ -251,17 +261,70 @@ public class MainActivity extends AppCompatActivity
         }
     }
     private void getUserName(){
-        StringRequest stringRequest = new StringRequest(GET, "10.0.0.1", new Response.Listener<String>() {
+        final JSONObject body = new JSONObject();
+        try {
+            body.put("longi", longi);
+            body.put("lat", lati);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String url ="http://79.137.37.198:3000/id";
+        StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                Log.i("user", response);
                 userNumber = Integer.parseInt(response);
-                Log.i("test", String.valueOf(userNumber));
+                Log.i("userNumber", String.valueOf(userNumber));
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
             }
+        }) {
+            @Override
+            public byte[] getBody() {
+                return body.toString().getBytes();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+            @Override
+            public Map<String, String> getHeaders(){
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json");
+                return headers;
+            }
+        };
+        Log.i("test", request.toString());
+        queue.add(request);
+        queue.start();
+
+    }
+    public void getTest(){
+        String url ="http://79.137.37.198:3000/";
+
+// Request a string response from the provided URL.
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Display the first 500 characters of the response string.
+                        try {
+                            Log.i("test", response.get("test").toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
         });
+
+        queue.add(jsonRequest);
     }
 }

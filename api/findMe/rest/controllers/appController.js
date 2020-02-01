@@ -6,7 +6,6 @@ module.exports = (app) => {
     });
 
     app.post('/id', (req, res, next) => {
-        console.log("test", req);
         let postquery = 'CALL getuid();';
         const values = null;
         let uid;
@@ -23,22 +22,24 @@ module.exports = (app) => {
             app.db.query(postQuery, params, function (err, result) {
                 if (err) throw err;
             });
+            console.log("posted: " + params);
             res.status(200).json(uid);
         });
     });
 
     app.post('/', (req, res, next )=> {
-
-        let postQuery = 'INSERT INTO uloc (uid, longitude, latitude) VALUES(?, ?, ?)'
-        let response = req;
-        let params = [
-            response.param("longi", 0),
-            response.param("lat", 0)
-        ];
-        app.db.query(postQuery, params, function (err, result) {
+        let userid = req.param("id");
+        let longi = req.param("longi");
+        let lat = req.param("lat");
+        let postQuery = 'UPDATE uloc SET longitude = ' + longi + " , latitude = " + lat + " WHERE uid= " + userid + ";";
+        app.db.query(postQuery, function (err, result) {
+            console.log("posted", postQuery);
             if (err) throw err;
             res.status(201).json("Added succesfully")
         } )
+    });
+    app.put('/getgoto', (req, res, next)=>{
+
     });
 
 };
