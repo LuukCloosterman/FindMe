@@ -4,7 +4,7 @@ module.exports = (app) => {
         console.log("test", "test called");
         res.status(200).json({test: "it works mothafuckas"})
     });
-    var myInterval;
+
     app.post('/id', (req, res, next) => {
         let postquery = 'CALL getuid();';
         const values = null;
@@ -42,28 +42,28 @@ module.exports = (app) => {
         let userid = req.param("id");
         let lat = req.param("lat");
         let longi = req.param("longi");
-        let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );';
-        let getquery = 'CALL getgemloc(' + userid + ");";
-        let gottenResult = null;
-        var myInterval = setInterval(makeQuery, 5000);
-
-
-    })
+        let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );'
+        let getquery = 'CALL getgemloc(' + userid + ");"
+        var myInterval = setInterval();
+            app.db.query(getquery, function (err, result) {
+                if (result !==undefined) {
+                    res.status(200).json(result);
+                } else {
+                    app.db.query(makequery, function (err, result) {
+                        app.db.query(getquery, function (err, result) {
+                            if (result !==undefined) {
+                                res.status(200).json(result);
+                            } else {
+                                res.status(404).json({"messsage": "no point found yet"})
+                            }
+                        })
+                    })
+                }
+            })
+    });
     app.delete('/', (req, res, next)=>{
        let userid = req.param("id");
     });
 
-    function makeQuery() {
-        app.db.query(getquery, function (err, result) {
-            if (result !==undefined) {
-                gottenResult = result;
-            } else {
-                app.db.query(makequery, function (err, result) {
 
-                });
-                clearInterval(myInterval)
-            }
-
-        })
-    }
 };
