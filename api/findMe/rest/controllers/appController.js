@@ -44,7 +44,6 @@ module.exports = (app) => {
         let longi = req.param("longi");
         let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );'
         let getquery = 'CALL getgemloc(' + userid + ");"
-        var myInterval = setInterval();
             app.db.query(getquery, function (err, result) {
                 if (result !==undefined) {
                     res.status(200).json(result);

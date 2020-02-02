@@ -13,6 +13,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -50,6 +51,7 @@ import java.util.Map;
 
 import static com.android.volley.Request.Method.DELETE;
 
+import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 
 public class MainActivity extends AppCompatActivity
@@ -106,13 +108,19 @@ public class MainActivity extends AppCompatActivity
         googleApiClient.connect();
         queue = Volley.newRequestQueue(this);
         getUserName();
-        getAVGLoc();
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         imgv = findViewById(R.id.imgv);
-        toGoTo.setLatitude(90);
-        toGoTo.setLongitude(0);
+        while (toGoTo == null){
 
-
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    getAVGLoc();
+                }
+            }, 5000);  //the time
+        }
 
 
     }
@@ -205,7 +213,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         startLocationUpdates();
-        DegreeStart = -(location.bearingTo(toGoTo));
     }
 
     private void startLocationUpdates() {
@@ -424,7 +431,43 @@ public class MainActivity extends AppCompatActivity
         };
     }
     void getAVGLoc(){
-        toGoTo = new Location("");
+        String url = "http://79.137.37.198:3000/getgoto";
+        final JSONObject body = new JSONObject();
+        try {
+            body.put("id", userNumber);
+            body.put("longi", longi);
+            body.put("lat", lati);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.i("test", response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            public byte[] getBody() {
+                return body.toString().getBytes();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+            @Override
+            public Map<String, String> getHeaders(){
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json");
+                return headers;
+            }
+        };
+
 
     }
 
