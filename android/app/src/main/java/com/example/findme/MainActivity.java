@@ -111,16 +111,20 @@ public class MainActivity extends AppCompatActivity
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         imgv = findViewById(R.id.imgv);
-        while (toGoTo == null){
+        toGoTo = new Location("");
+
 
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    getAVGLoc();
+                    if(toGoTo.getLatitude() ==0 || toGoTo.getLongitude() ==0) {
+                        getAVGLoc();
+                        handler.postDelayed(this, 5000);
+                    }
                 }
             }, 5000);  //the time
-        }
+
 
 
     }
@@ -443,12 +447,12 @@ public class MainActivity extends AppCompatActivity
         JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Log.i("test", response.toString());
+                Log.i("avgloc", response.toString());
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.i("avgloc", error.getMessage());
             }
         }) {
             @Override
@@ -467,6 +471,7 @@ public class MainActivity extends AppCompatActivity
                 return headers;
             }
         };
+        queue.add(request);
 
 
     }

@@ -53,7 +53,7 @@ module.exports = (app) => {
                             if (result !==undefined) {
                                 res.status(200).json(result);
                             } else {
-                                res.status(404).json({"messsage": "no point found yet"})
+                                res.status(200).json({"messsage": "no point found yet"})
                             }
                         })
                     })
