@@ -2,12 +2,21 @@ package com.example.findme;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,7 +28,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
+
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -30,21 +39,22 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.android.volley.Request.Method.GET;
+import static com.android.volley.Request.Method.DELETE;
+
 import static com.android.volley.Request.Method.POST;
 
 public class MainActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener{
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, SensorEventListener{
 
     private Location location;
     private TextView locationTv;
@@ -62,6 +72,12 @@ public class MainActivity extends AppCompatActivity
     private double longi;
     private double lati;
     private RequestQueue queue;
+    Location toGoTo;
+    SensorManager sensorManager;
+    float degrees =0f;
+    private float DegreeStart =0f;
+    ImageView imgv;
+    private Location togoto;
 
 
     @Override
@@ -90,6 +106,15 @@ public class MainActivity extends AppCompatActivity
         googleApiClient.connect();
         queue = Volley.newRequestQueue(this);
         getUserName();
+        getAVGLoc();
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        imgv = findViewById(R.id.imgv);
+        toGoTo.setLatitude(90);
+        toGoTo.setLongitude(0);
+
+
+
+
     }
 
 
@@ -120,6 +145,8 @@ public class MainActivity extends AppCompatActivity
         if (googleApiClient != null) {
             googleApiClient.connect();
         }
+
+
     }
 
     @Override
@@ -129,6 +156,8 @@ public class MainActivity extends AppCompatActivity
         if (!checkPlayServices()) {
             locationTv.setText("You need to install Google Play Services to use the App properly");
         }
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -176,6 +205,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         startLocationUpdates();
+        DegreeStart = -(location.bearingTo(toGoTo));
     }
 
     private void startLocationUpdates() {
@@ -192,6 +222,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+
     }
 
     @Override
@@ -205,20 +236,47 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
-//            locationTv.setText("Latitude : " + location.getLatitude() + "\nLongitude : " + location.getLongitude());
-
-            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest("10.0.0.1", new Response.Listener<JSONArray>() {
+            locationTv.setText("Latitude : " + location.getLatitude() + "\nLongitude : " + location.getLongitude());
+            longi = location.getLongitude();
+            lati = location.getLatitude();
+            final JSONObject body = new JSONObject();
+            try {
+                body.put("id", userNumber);
+                body.put("longi", longi);
+                body.put("lat", lati);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            String url ="http://79.137.37.198:3000/";
+            StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
                 @Override
-                public void onResponse(JSONArray response) {
-
+                public void onResponse(String response) {
+                    Log.i("update", response);
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
 
                 }
-            });
+            }) {
+                @Override
+                public byte[] getBody() {
+                    return body.toString().getBytes();
+                }
 
+                @Override
+                public String getBodyContentType() {
+                    return "application/json";
+                }
+                @Override
+                public Map<String, String> getHeaders(){
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type","application/json");
+                    return headers;
+                }
+            };
+            queue.add(request);
+            queue.start();
 
         }
     }
@@ -326,5 +384,70 @@ public class MainActivity extends AppCompatActivity
         });
 
         queue.add(jsonRequest);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        String url ="http://79.137.37.198:3000/";
+        final JSONObject body = new JSONObject();
+        try {
+            body.put("id", userNumber);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        StringRequest request = new StringRequest(DELETE, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            public byte[] getBody() {
+                return body.toString().getBytes();
+            }
+
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+            @Override
+            public Map<String, String> getHeaders(){
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type","application/json");
+                return headers;
+            }
+        };
+    }
+    void getAVGLoc(){
+        toGoTo = new Location("");
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        degrees = Math.round(event.values[0]);
+        RotateAnimation ra = new RotateAnimation(
+                DegreeStart,
+                -degrees,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        // set the compass animation after the end of the reservation status
+        ra.setFillAfter(true);
+        // set how long the animation for the compass image will take place
+        ra.setDuration(210);
+        // Start animation of compass image
+        imgv.startAnimation(ra);
+        DegreeStart = -degrees;
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }
