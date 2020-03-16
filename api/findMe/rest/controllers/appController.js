@@ -45,13 +45,18 @@ module.exports = (app) => {
         let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );'
         let getquery = 'CALL getgemloc(' + userid + ");"
             app.db.query(getquery, function (err, result) {
-                if (result !==undefined) {
-                    res.status(200).json(result);
+                if (!result[0].entries([])) {
+                    res.status(200).json(result[0]);
+                    console.log(result[0]);
                 } else {
                     app.db.query(makequery, function (err, result) {
+                        if (err){
+                            console.log(err);
+                        }
+                        console.log("makeresult", result);
                         app.db.query(getquery, function (err, result) {
-                            if (result !==undefined) {
-                                res.status(200).json(result);
+                            if (!result [0].entries([])) {
+                                res.status(200).json(result[0]);
                             } else {
                                 res.status(200).json({"messsage": "no point found yet"})
                             }

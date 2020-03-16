@@ -74,12 +74,12 @@ public class MainActivity extends AppCompatActivity
     private double longi;
     private double lati;
     private RequestQueue queue;
-    Location toGoTo;
+    private Location toGoTo;
     SensorManager sensorManager;
     float degrees =0f;
     private float DegreeStart =0f;
     ImageView imgv;
-    private Location togoto;
+
 
 
     @Override
@@ -372,30 +372,6 @@ public class MainActivity extends AppCompatActivity
         queue.start();
 
     }
-    public void getTest(){
-        String url ="http://79.137.37.198:3000/";
-
-// Request a string response from the provided URL.
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // Display the first 500 characters of the response string.
-                        try {
-                            Log.i("test", response.get("test").toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-        queue.add(jsonRequest);
-    }
 
     @Override
     protected void onStop() {
@@ -448,6 +424,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(JSONObject response) {
                 Log.i("avgloc", response.toString());
+                if (!response.toString().contains("no point found yet")){
+                    try {
+                        toGoTo.setLatitude(Integer.parseInt(response.get("latitude").toString()));
+                        toGoTo.setLongitude(Integer.parseInt(response.get("longitude").toString()));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }, new Response.ErrorListener() {
             @Override
