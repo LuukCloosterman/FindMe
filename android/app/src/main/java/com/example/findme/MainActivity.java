@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -428,6 +429,8 @@ public class MainActivity extends AppCompatActivity
                     try {
                         toGoTo.setLatitude(Integer.parseInt(response.get("latitude").toString()));
                         toGoTo.setLongitude(Integer.parseInt(response.get("longitude").toString()));
+                        TextView searchingTV = findViewById(R.id.searchingTV);
+                        searchingTV.setVisibility(View.INVISIBLE);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

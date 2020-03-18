@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FDFDF9"
     android:orientation="vertical">
 
     <TextView
@@ -16,13 +17,25 @@
 
     <ImageView
         android:id="@+id/imgv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="279dp"
+        android:layout_height="336dp"
         android:rotation="90"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/locationTV"
-        app:srcCompat="?attr/homeAsUpIndicator" />
+        app:layout_constraintVertical_bias="0.451"
+        app:srcCompat="@drawable/Voelcirkel" />
+
+    <TextView
+        android:id="@+id/searchingTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:text="@string/searching"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
