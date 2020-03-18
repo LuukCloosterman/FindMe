@@ -25,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/locationTV"
         app:layout_constraintVertical_bias="0.451"
-        app:srcCompat="@drawable/Voelcirkel" />
+        app:srcCompat="@drawable/voelcirkel" />
 
     <TextView
         android:id="@+id/searchingTV"
