@@ -45,6 +45,7 @@ module.exports = (app) => {
         let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );'
         let getquery = 'CALL getgemloc(' + userid + ");"
             app.db.query(getquery, function (err, result) {
+                if(err) throw err;
                 if (!result[0].entries([])) {
                     res.status(200).json(result[0]);
                     console.log(result[0]);
