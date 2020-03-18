@@ -14,6 +14,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 
@@ -76,9 +78,10 @@ public class MainActivity extends AppCompatActivity
     private double lati;
     private RequestQueue queue;
     private Location toGoTo;
+    private Location myLocation;
     SensorManager sensorManager;
+    private ConstraintLayout turningThing;
     float degrees =0f;
-    private float DegreeStart =0f;
     ImageView imgv;
 
 
@@ -87,13 +90,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        locationTv = findViewById(R.id.locationTV);
         // we add permissions we need to request location of the users
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
 
         permissionsToRequest = permissionsToRequest(permissions);
-
+        turningThing = findViewById(R.id.turningthing);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
                 requestPermissions(permissionsToRequest.toArray(
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity
         location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
         if (location != null) {
-            locationTv.setText("Latitude : " + location.getLatitude() + "\nLongitude : " + location.getLongitude());
+            myLocation = location;
         }
 
         startLocationUpdates();
@@ -248,7 +250,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
-            locationTv.setText("Latitude : " + location.getLatitude() + "\nLongitude : " + location.getLongitude());
+            myLocation = location;
             longi = location.getLongitude();
             lati = location.getLatitude();
             final JSONObject body = new JSONObject();
@@ -439,7 +441,6 @@ public class MainActivity extends AppCompatActivity
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.i("avgloc", error.getMessage());
             }
         }) {
             @Override
@@ -465,24 +466,33 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        degrees = Math.round(event.values[0]);
-        RotateAnimation ra = new RotateAnimation(
-                DegreeStart,
-                -degrees,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        // set the compass animation after the end of the reservation status
-        ra.setFillAfter(true);
-        // set how long the animation for the compass image will take place
-        ra.setDuration(210);
-        // Start animation of compass image
-        imgv.startAnimation(ra);
-        DegreeStart = -degrees;
+        if (toGoTo.getLongitude()!=0) {
+            degrees = Math.round(event.values[0]);
+            float DegreeStart = 0;
+            DegreeStart = myLocation.bearingTo(toGoTo);
 
+            RotateAnimation ra = new RotateAnimation(
+                    DegreeStart,
+                    -degrees,
+                    Animation.RELATIVE_TO_SELF, 0.5f,
+                    Animation.RELATIVE_TO_SELF, 0.5f);
+            // set the compass animation after the end of the reservation status
+            ra.setFillAfter(true);
+            // set how long the animation for the compass image will take place
+            ra.setDuration(210);
+            // Start animation of compass image
+            turningThing.startAnimation(ra);
+        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+    public void onVibrateClick(View view){
+        if (toGoTo.getLongitude()!=0) {
+            Vibrator vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vb.vibrate(100);
+        }
     }
 }

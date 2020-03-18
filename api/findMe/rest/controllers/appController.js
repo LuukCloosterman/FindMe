@@ -55,8 +55,8 @@ module.exports = (app) => {
                         }
                         console.log("makeresult", result);
                         app.db.query(getquery, function (err, result) {
-                            if (!result [0].entries([])) {
-                                res.status(200).json(result[0]);
+                            if (result[0][0] ) {
+                                res.status(200).json(result[0][0]);
                             } else {
                                 res.status(200).json({"messsage": "no point found yet"})
                             }

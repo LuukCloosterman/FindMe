@@ -8,26 +8,6 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/locationTV"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <ImageView
-        android:id="@+id/imgv"
-        android:layout_width="279dp"
-        android:layout_height="336dp"
-        android:rotation="90"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/locationTV"
-        app:layout_constraintVertical_bias="0.451"
-        app:srcCompat="@drawable/voelcirkel" />
-
-    <TextView
         android:id="@+id/searchingTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +15,37 @@
         android:text="@string/searching"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/turningthing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/searchingTV"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgv" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgv"
+            android:layout_width="wrap_content"
+            android:layout_height="336dp"
+            android:rotation="90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/voelcirkel" />
+
+        <Button
+            android:id="@+id/vibrateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onVibrateClick"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/imgv"
+            app:layout_constraintStart_toStartOf="@+id/imgv"
+            app:layout_constraintTop_toTopOf="@+id/imgv" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

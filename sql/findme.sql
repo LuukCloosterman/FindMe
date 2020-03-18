@@ -119,16 +119,16 @@ if exists(select  latitude,longitude
 		from Uloc 
 		where calcDist(lat,lon,latitude,longitude)<15)
 	THEN
-		select  uid ,latitude,longitude
-		into @uid, @latitude, @longitude
-		from Uloc left join gemloc
-        	on uid = uid
-		where calcDist(lat,lon,latitude,longitude)<15
-        and uid != uidIN
-		order by calcDist(lat,lon,latitude,longitude) desc
+		select  uloc.uid ,uloc.latitude,uloc.longitude
+		into @uid, @lat2, @lon2
+		from uloc left join gemloc
+        	on uloc.uid = gemloc.uid
+		where calcDist(lat,lon,uloc.latitude,uloc.longitude)<15
+        and uloc.uid != uidIN
+		order by calcDist(lat,lon,uloc.latitude,uloc.longitude) desc
 		LIMIT 1 ;
         
-        call `setMeeting`(uidIN, lat, lon, @uid, @latitude, @longitude);
+        call `setMeeting`(uidIN, lat, lon, @uid, @lat2, @lon2);
         
         
         
