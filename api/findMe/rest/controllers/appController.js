@@ -39,7 +39,7 @@ module.exports = (app) => {
         } )
     });
     app.get('/getgoto', (req,res, next)=>{
-        console.log(req.toString());
+        console.log(req.body);
         let userid = req.param("id");
         let lat = req.param("lat");
         let longi = req.param("longi");
