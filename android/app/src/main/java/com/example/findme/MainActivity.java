@@ -424,12 +424,13 @@ public class MainActivity extends AppCompatActivity
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        JsonObjectRequest request = new JsonObjectRequest(GET, url, null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(GET, url, body, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.i("avgloc", response.toString());
                 if (!response.toString().contains("no point found yet")){
                     try {
+                        Log.i(("test", "point found"))
                         toGoTo.setLatitude(Integer.parseInt(response.get("latitude").toString()));
                         toGoTo.setLongitude(Integer.parseInt(response.get("longitude").toString()));
                         TextView searchingTV = findViewById(R.id.searchingTV);
@@ -460,7 +461,7 @@ public class MainActivity extends AppCompatActivity
                 return headers;
             }
         };
-        Log.i("test", new String(request.getBody()));
+
         queue.add(request);
         queue.start();
 
