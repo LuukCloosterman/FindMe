@@ -445,11 +445,9 @@ public class MainActivity extends AppCompatActivity
             public void onErrorResponse(VolleyError error) {
             }
         });
-
+        Log.i("test", new String(request.getBody()));
         queue.add(request);
         queue.start();
-
-
     }
 
     @Override
