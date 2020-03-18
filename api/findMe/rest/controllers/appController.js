@@ -40,9 +40,9 @@ module.exports = (app) => {
     });
     app.get('/getgoto', (req,res, next)=>{
         console.log(req.body);
-        let userid = req.body.get("id");
-        let lat = req.body.get("lat");
-        let longi = req.get("longi");
+        let userid = req.param("id");
+        let lat = req.param("lat");
+        let longi = req.param("longi");
         if(userid!=undefined) {
              console.log("weer een stapje verder");
             let makequery = 'CALL makeGemLoc(' + userid + ", " + lat + ", " + longi + ' );'

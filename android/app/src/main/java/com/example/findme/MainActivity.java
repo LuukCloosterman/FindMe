@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity
                 Log.i("avgloc", response.toString());
                 if (!response.toString().contains("no point found yet")){
                     try {
-                        Log.i(("test", "point found"))
+                        Log.i("test", "point found");
                         toGoTo.setLatitude(Integer.parseInt(response.get("latitude").toString()));
                         toGoTo.setLongitude(Integer.parseInt(response.get("longitude").toString()));
                         TextView searchingTV = findViewById(R.id.searchingTV);
@@ -444,23 +444,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onErrorResponse(VolleyError error) {
             }
-        }) {
-            @Override
-            public byte[] getBody() {
-                return body.toString().getBytes();
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-            @Override
-            public Map<String, String> getHeaders(){
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type","application/json");
-                return headers;
-            }
-        };
+        });
 
         queue.add(request);
         queue.start();
