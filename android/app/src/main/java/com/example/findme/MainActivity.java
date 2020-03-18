@@ -424,7 +424,7 @@ public class MainActivity extends AppCompatActivity
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        JsonObjectRequest request = new JsonObjectRequest(GET, url, body, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(POST, url, body, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Log.i("avgloc", response.toString());

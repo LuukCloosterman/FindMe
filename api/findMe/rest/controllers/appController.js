@@ -38,7 +38,7 @@ module.exports = (app) => {
             res.status(201).json("Updated succesfully")
         } )
     });
-    app.get('/getgoto', (req,res, next)=>{
+    app.post('/getgoto', (req,res, next)=>{
         console.log(req.body);
         let userid = req.param("id");
         let lat = req.param("lat");
