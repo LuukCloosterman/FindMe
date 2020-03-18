@@ -80,7 +80,7 @@ set @lat = (lat1 + lat2) / 2;
 set @lon = (lon1 + lon2) / 2;
 
 
-insert into gemLoc(uid,latitude,longitude)
+insert into gemloc(uid,latitude,longitude)
 values (uid1,ROUND(@lat,9),ROUND(@lon,9)),
 	   (uid2,ROUND(@lat,9),ROUND(@lon,9));
 
@@ -94,12 +94,12 @@ DELIMITER ;;
 CREATE PROCEDURE `makeGemLoc`(uidIN int, lat decimal(9,6), lon decimal(9,6))
 proc: BEGIN 
 if exists(select  latitude,longitude
-		from gemLoc 
+		from gemloc 
 		where calcDist(lat,lon,latitude,longitude)<15)	
 	THEN
 		select  latitude,longitude
 		into @latitude, @longitude
-		from gemLoc 
+		from gemloc 
 		where calcDist(lat,lon,latitude,longitude)<15
 		order by calcDist(lat,lon,latitude,longitude) desc
 		LIMIT 1 ;
