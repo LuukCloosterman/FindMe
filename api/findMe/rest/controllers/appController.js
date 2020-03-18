@@ -39,24 +39,27 @@ module.exports = (app) => {
         } )
     });
     app.get('/getgoto', (req,res, next)=>{
+        console.log(req.toString());
         let userid = req.param("id");
         let lat = req.param("lat");
         let longi = req.param("longi");
-        let makequery = 'CALL makeGemLoc(' + userid + ", "+  lat + ", " + longi + ' );'
-        let getquery = 'CALL getgemloc(' + userid + ");"
+        if(userid!=undefined) {
+             console.log("weer een stapje verder");
+            let makequery = 'CALL makeGemLoc(' + userid + ", " + lat + ", " + longi + ' );'
+            let getquery = 'CALL getgemloc(' + userid + ');'
             app.db.query(getquery, function (err, result) {
-                if(err) throw err;
+                if (err) throw err;
                 if (!result[0].entries([])) {
                     res.status(200).json(result[0]);
                     console.log(result[0]);
                 } else {
                     app.db.query(makequery, function (err, result) {
-                        if (err){
+                        if (err) {
                             console.log(err);
                         }
                         console.log("makeresult", result);
                         app.db.query(getquery, function (err, result) {
-                            if (result[0][0] ) {
+                            if (result[0][0]) {
                                 res.status(200).json(result[0][0]);
                             } else {
                                 res.status(200).json({"messsage": "no point found yet"})
@@ -65,6 +68,10 @@ module.exports = (app) => {
                     })
                 }
             })
+        }
+        else {
+            console.log("undefined shits")
+        }
     });
     app.delete('/', (req, res, next)=>{
        let userid = req.param("id");

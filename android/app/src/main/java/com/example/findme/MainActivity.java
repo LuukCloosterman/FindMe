@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity
 
         permissionsToRequest = permissionsToRequest(permissions);
         turningThing = findViewById(R.id.turningthing);
+        userNumber =0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
                 requestPermissions(permissionsToRequest.toArray(
@@ -121,7 +122,7 @@ public class MainActivity extends AppCompatActivity
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if(toGoTo.getLatitude() ==0 || toGoTo.getLongitude() ==0) {
+                    if((toGoTo.getLatitude() ==0 || toGoTo.getLongitude() ==0) && userNumber!=0){
                         getAVGLoc();
                         handler.postDelayed(this, 5000);
                     }
@@ -290,7 +291,7 @@ public class MainActivity extends AppCompatActivity
                 }
             };
             queue.add(request);
-            queue.start();
+
 
         }
     }
@@ -459,7 +460,9 @@ public class MainActivity extends AppCompatActivity
                 return headers;
             }
         };
+        Log.i("test", new String(request.getBody()));
         queue.add(request);
+        queue.start();
 
 
     }
