@@ -116,7 +116,7 @@ if exists(select  latitude,longitude
 
 
 if exists(select  latitude,longitude
-		from Uloc 
+		from uloc 
 		where calcDist(lat,lon,latitude,longitude)<15)
 	THEN
 		select  uloc.uid ,uloc.latitude,uloc.longitude
@@ -162,7 +162,7 @@ BEGIN
     where uid = userID;
     
     delete
-    from Uloc
+    from uloc
     where uid = userID;
     
     delete
