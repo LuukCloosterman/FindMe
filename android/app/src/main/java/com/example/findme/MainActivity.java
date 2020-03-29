@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -44,10 +46,12 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
+import org.apache.commons.math3.util.Precision;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity
     private Location myLocation;
     SensorManager sensorManager;
     private ConstraintLayout turningThing;
+    private TextView searchingTV;
     float degrees =0f;
     ImageView imgv;
 
@@ -89,6 +94,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
+        getSupportActionBar().hide(); // hide the title bar
         setContentView(R.layout.activity_main);
         // we add permissions we need to request location of the users
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -96,6 +103,7 @@ public class MainActivity extends AppCompatActivity
 
         permissionsToRequest = permissionsToRequest(permissions);
         turningThing = findViewById(R.id.turningthing);
+        searchingTV = findViewById(R.id.searchingTV);
         userNumber =0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
@@ -170,7 +178,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         if (!checkPlayServices()) {
-            locationTv.setText("You need to install Google Play Services to use the App properly");
+            searchingTV.setText("You need to install Google Play Services to use the App properly");
         }
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
                 SensorManager.SENSOR_DELAY_GAME);
@@ -250,10 +258,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationChanged(Location location) {
+        DecimalFormat df = new DecimalFormat("###.######");
         if (location != null) {
             myLocation = location;
-            longi = location.getLongitude();
-            lati = location.getLatitude();
+
+            longi = Precision.round(location.getLongitude(), 6);
+            lati = Precision.round(location.getLatitude(), 6);
             final JSONObject body = new JSONObject();
             try {
                 body.put("id", userNumber);
@@ -290,7 +300,33 @@ public class MainActivity extends AppCompatActivity
                     return headers;
                 }
             };
+            if(toGoTo.getLongitude()!=0) {
+                int distance = Math.round(myLocation.distanceTo(toGoTo));
+                if (distance<50){
+                    if(distance<5){
+                        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+                        dlgAlert.setMessage(R.string.openCameraMessage);
+                        dlgAlert.setTitle(R.string.openCamera);
+                        dlgAlert.setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onCameraClick();
+                            }
+                        });
+                        dlgAlert.setCancelable(true);
+                        dlgAlert.create().show();
+                    } else {
+                        searchingTV.setText(distance + " " + R.string.meter);
+                        searchingTV.setVisibility(View.VISIBLE);
+                    }
+
+                } else {
+                    searchingTV.setVisibility(View.INVISIBLE);
+                }
+            }
             queue.add(request);
+
+
 
 
         }
@@ -431,9 +467,8 @@ public class MainActivity extends AppCompatActivity
                 if (!response.toString().contains("no point found yet")){
                     try {
                         Log.i("test", "point found");
-                        toGoTo.setLatitude(Integer.parseInt(response.get("latitude").toString()));
-                        toGoTo.setLongitude(Integer.parseInt(response.get("longitude").toString()));
-                        TextView searchingTV = findViewById(R.id.searchingTV);
+                        toGoTo.setLatitude(Double.parseDouble(response.get("latitude").toString()));
+                        toGoTo.setLongitude(Double.parseDouble(response.get("longitude").toString()));
                         searchingTV.setVisibility(View.INVISIBLE);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -445,7 +480,6 @@ public class MainActivity extends AppCompatActivity
             public void onErrorResponse(VolleyError error) {
             }
         });
-        Log.i("test", new String(request.getBody()));
         queue.add(request);
         queue.start();
     }
@@ -478,7 +512,15 @@ public class MainActivity extends AppCompatActivity
     public void onVibrateClick(View view){
         if (toGoTo.getLongitude()!=0) {
             Vibrator vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            vb.vibrate(100);
+            vb.vibrate(500);
         }
     }
+    public void onCameraClick(){
+        Log.i("", "This should be in the camera now....");
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        startActivity(intent);
+
+    }
+
+
 }

@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">FindMe</string>
     <string name="searching">Searching....</string>
+    <string name="meter">meter</string>
+<string name="openCameraMessage">You\'re here! Do you want to take a selfie with your new friends?</string>
+    <string name="openCamera">Open camera?</string>
+    <string name="open">Open</string>
 </resources>

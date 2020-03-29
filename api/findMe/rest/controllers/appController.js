@@ -80,6 +80,12 @@ module.exports = (app) => {
     });
     app.delete('/', (req, res, next)=>{
        let userid = req.param("id");
+       let query = 'CALL logout(' + userid + ");";
+       app.db.query(query, function (err, result) {
+        if (err){
+            console.log(err);
+        }
+       })
     });
 
 
