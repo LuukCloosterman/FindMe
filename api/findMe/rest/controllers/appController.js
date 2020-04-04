@@ -85,6 +85,7 @@ module.exports = (app) => {
             console.log(err);
         } else {
             res.status(200).json({"message": "deleted!"})
+            console.log("deleted", userid);
         }
        })
     });
