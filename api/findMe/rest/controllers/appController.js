@@ -44,7 +44,6 @@ module.exports = (app) => {
         let lat = req.param("lat");
         let longi = req.param("longi");
         if(userid!=undefined) {
-             console.log("weer een stapje verder");
             let makequery = 'CALL makeGemLoc(' + userid + ", " + lat + ", " + longi + ' );'
             let getquery = 'CALL getgemloc(' + userid + ');'
             app.db.query(getquery, function (err, result) {
@@ -78,15 +77,15 @@ module.exports = (app) => {
             console.log("undefined shits")
         }
     });
-    app.delete('/', (req, res, next)=>{
+    app.post('/delete', (req, res, next)=>{
        let userid = req.param("id");
-       let query = 'CALL logout(' + userid + ");";
+       let query = 'CALL logout(' + userid + ');';
        app.db.query(query, function (err, result) {
         if (err){
             console.log(err);
+        } else {
+            res.status(200).json({"message": "deleted!"})
         }
        })
     });
-
-
 };

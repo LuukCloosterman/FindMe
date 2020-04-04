@@ -258,7 +258,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLocationChanged(Location location) {
-        DecimalFormat df = new DecimalFormat("###.######");
         if (location != null) {
             myLocation = location;
 
@@ -304,6 +303,7 @@ public class MainActivity extends AppCompatActivity
                 int distance = Math.round(myLocation.distanceTo(toGoTo));
                 if (distance<50){
                     if(distance<5){
+
                         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
                         dlgAlert.setMessage(R.string.openCameraMessage);
                         dlgAlert.setTitle(R.string.openCamera);
@@ -415,15 +415,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        super.onStop();
-        String url ="http://79.137.37.198:3000/";
+        String url ="http://79.137.37.198:3000/delete";
         final JSONObject body = new JSONObject();
         try {
             body.put("id", userNumber);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        StringRequest request = new StringRequest(DELETE, url, new Response.Listener<String>() {
+        StringRequest request = new StringRequest(POST, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
             }
@@ -449,6 +448,10 @@ public class MainActivity extends AppCompatActivity
                 return headers;
             }
         };
+        queue.add(request);
+        queue.start();
+        super.onStop();
+
     }
     void getAVGLoc(){
         String url = "http://79.137.37.198:3000/getgoto";
