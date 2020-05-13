@@ -1,15 +1,14 @@
 package com.example.findme;
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Build;
@@ -19,9 +18,10 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +30,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,6 +37,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.findme.character.CharacterProvider;
+import com.example.findme.mission.MissionProvider;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -51,14 +52,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.android.volley.Request.Method.DELETE;
-
-import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 
 public class MainActivity extends AppCompatActivity
@@ -86,8 +83,12 @@ public class MainActivity extends AppCompatActivity
     SensorManager sensorManager;
     private ConstraintLayout turningThing;
     private TextView searchingTV;
-    float degrees =0f;
-    ImageView imgv;
+    float heading =0f;
+    private ImageView imgv;
+    private String status;
+    private String character;
+    GeomagneticField geoField;
+    float myBearing;
 
 
 
@@ -100,11 +101,37 @@ public class MainActivity extends AppCompatActivity
         // we add permissions we need to request location of the users
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-
         permissionsToRequest = permissionsToRequest(permissions);
         turningThing = findViewById(R.id.turningthing);
         searchingTV = findViewById(R.id.searchingTV);
         userNumber =0;
+        CharacterProvider characterProvider = new CharacterProvider();
+        status = characterProvider.getStatus();
+        final ArrayAdapter<String> adp = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item, characterProvider.getCharacters());
+        final Spinner sp = new Spinner(MainActivity.this);
+        sp.setAdapter(adp);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        TextView spinnerDialTV = new TextView(MainActivity.this);
+        spinnerDialTV.setText("For this session your character is a: " + status + " ....");
+        spinnerDialTV.setTextSize(18);
+
+        LinearLayout layout = new LinearLayout(MainActivity.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(spinnerDialTV);
+        layout.addView(sp);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Continue...", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                character = sp.getSelectedItem().toString();
+                Log.i("test", character);
+
+            }
+        });
+        builder.setView(layout);
+        builder.create().show();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
                 requestPermissions(permissionsToRequest.toArray(
@@ -315,19 +342,22 @@ public class MainActivity extends AppCompatActivity
                         });
                         dlgAlert.setCancelable(true);
                         dlgAlert.create().show();
+                        locationRequest.setNumUpdates(0);
                     } else {
                         searchingTV.setText(distance + " " + R.string.meter);
-                        searchingTV.setVisibility(View.VISIBLE);
+
                     }
 
                 } else {
-                    searchingTV.setVisibility(View.INVISIBLE);
+//                    searchingTV.setVisibility(View.INVISIBLE);
                 }
             }
             queue.add(request);
-
-
-
+            geoField = new GeomagneticField(
+                    Double.valueOf(location.getLatitude()).floatValue(),
+                    Double.valueOf(location.getLongitude()).floatValue(),
+                    Double.valueOf(location.getAltitude()).floatValue(),
+                    System.currentTimeMillis());
 
         }
     }
@@ -472,7 +502,8 @@ public class MainActivity extends AppCompatActivity
                         Log.i("test", "point found");
                         toGoTo.setLatitude(Double.parseDouble(response.get("latitude").toString()));
                         toGoTo.setLongitude(Double.parseDouble(response.get("longitude").toString()));
-                        searchingTV.setVisibility(View.INVISIBLE);
+                        searchingTV.setText("");
+                        MissionProvider mp = new MissionProvider(searchingTV);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -490,21 +521,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (toGoTo.getLongitude()!=0) {
-            degrees = Math.round(event.values[0]);
-            float DegreeStart = 0;
-            DegreeStart = myLocation.bearingTo(toGoTo);
-
-            RotateAnimation ra = new RotateAnimation(
-                    DegreeStart,
-                    -degrees,
-                    Animation.RELATIVE_TO_SELF, 0.5f,
-                    Animation.RELATIVE_TO_SELF, 0.5f);
-            // set the compass animation after the end of the reservation status
-            ra.setFillAfter(true);
-            // set how long the animation for the compass image will take place
-            ra.setDuration(210);
-            // Start animation of compass image
-            turningThing.startAnimation(ra);
+            float degree = Math.round(event.values[0]);
+            heading += geoField.getDeclination();
+            myBearing = location.bearingTo(toGoTo);
+            heading = myBearing - (myBearing + heading);
+            heading = Math.round(-heading / 360 + 180);
+            // create a rotation animation (reverse turn degree heading)
+            Log.i("test" , String.valueOf(heading));
         }
     }
 
